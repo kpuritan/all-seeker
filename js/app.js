@@ -1,5 +1,5 @@
 /**
- * SolvEdu (쏠에듀) - 교육 자료 오픈마켓 프론트엔드 메인 로직
+ * 모든 과목을 찾는 사람들 - 교육 자료 오픈마켓 프론트엔드 메인 로직
  */
 
 // ==========================================
@@ -8,22 +8,24 @@
 const appState = {
   currentPage: 'home', // 'home' | 'market' | 'product-detail' | 'seller-dashboard' | 'library'
   userMode: 'teacher', // 'teacher' | 'student'
-  selectedProductId: 'prod_1',
+  selectedProductId: 'prod_eng_1',
+  selectedSubjectTab: '영어', // '영어' | '국어' | '수학' | '과학' | '사회'
   detailActiveTab: 'intro', // 'intro' | 'reviews' | 'copyright'
   previewCurrentPage: 1,
   
   // Market filters
   filters: {
-    grades: [],       // ['중1', '중2', '중3', '고1']
-    areas: [],        // ['개념노트', '기출문제', '수행평가']
-    publishers: [],   // ['비상교육', '천재교육', '미래엔', '동아출판', 'EBS']
-    sort: 'popular',  // 'popular' | 'latest' | 'price-asc' | 'rating'
+    subjects: ['영어'], // ['영어', '국어', '수학', '과학', '사회']
+    grades: [],         // ['중등', '고1', '고등', '수능']
+    areas: [],          // ['개념노트', '기출문제', '수행평가']
+    publishers: [],     // ['비상교육', '천재교육', '미래엔', '동아출판', 'EBS']
+    sort: 'popular',    // 'popular' | 'latest' | 'price-asc' | 'rating'
     search: ''
   },
 
   // Shopping Cart & Purchases
   cart: [],
-  purchasedProducts: ['prod_1'], // 기본 구매 샘플 보관함용
+  purchasedProducts: ['prod_eng_1'], // 기본 구매 샘플 보관함용
   
   // Carousel Banner Index
   currentBannerIndex: 0,
@@ -42,8 +44,19 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initApp() {
-  // 장바구니 로컬스토리지 불러오기 또는 기본값 설정
   updateCartBadge();
+  
+  // 신규 가입 팝업 하루 보지 않기 체크
+  const hideBenefit = localStorage.getItem('hide_benefit_popup');
+  const now = new Date().getTime();
+  if (hideBenefit && now < parseInt(hideBenefit, 10)) {
+    const modal = document.getElementById('welcomeBenefitModal');
+    if (modal) {
+      modal.classList.add('hidden');
+      modal.style.display = 'none';
+    }
+  }
+
   navigateTo('home');
   lucide.createIcons();
 }
@@ -105,44 +118,79 @@ function switchUserMode(mode) {
   appState.userMode = mode;
   const btnT = document.getElementById('btnTeacherMode');
   const btnS = document.getElementById('btnStudentMode');
-  const descBadge = document.getElementById('modeDescriptionBadge');
 
   if (mode === 'teacher') {
-    btnT.className = 'px-2.5 py-0.5 rounded-full text-xs font-semibold bg-brand-teal text-white shadow transition-all flex items-center gap-1';
-    btnS.className = 'px-2.5 py-0.5 rounded-full text-xs font-medium text-slate-400 hover:text-white transition-all flex items-center gap-1';
-    if (descBadge) {
-      descBadge.textContent = '수업용 HWP 한글파일 및 내신 변형 킬러문항 우선 노출 중';
-      descBadge.className = 'hidden sm:inline-block ml-2 text-teal-400 bg-teal-950/60 border border-teal-800/80 px-2 py-0.5 rounded text-[11px]';
-    }
-    showToast('선생님 모드로 전환되었습니다. (수업/출제용 HWP 파일 큐레이션)', 'success');
+    if (btnT) btnT.className = 'px-3 py-1 rounded-full text-xs font-bold bg-white text-slate-900 shadow-xs transition-all';
+    if (btnS) btnS.className = 'px-3 py-1 rounded-full text-xs font-medium text-slate-500 hover:text-slate-900 transition-all';
+    showToast('선생님 모드로 전환되었습니다. (수업/출제용 HWP 한글파일 큐레이션)', 'success');
   } else {
-    btnS.className = 'px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-600 text-white shadow transition-all flex items-center gap-1';
-    btnT.className = 'px-2.5 py-0.5 rounded-full text-xs font-medium text-slate-400 hover:text-white transition-all flex items-center gap-1';
-    if (descBadge) {
-      descBadge.textContent = '학생 자습용 벼락치기 핵심요약 및 수행평가 예시 답안 큐레이션 중';
-      descBadge.className = 'hidden sm:inline-block ml-2 text-blue-400 bg-blue-950/60 border border-blue-800/80 px-2 py-0.5 rounded text-[11px]';
-    }
-    showToast('학생 모드로 전환되었습니다. (자습/시험대비 요약본 큐레이션)', 'info');
+    if (btnS) btnS.className = 'px-3 py-1 rounded-full text-xs font-bold bg-white text-slate-900 shadow-xs transition-all';
+    if (btnT) btnT.className = 'px-3 py-1 rounded-full text-xs font-medium text-slate-500 hover:text-slate-900 transition-all';
+    showToast('학생 모드로 전환되었습니다. (자습/내신대비 핵심요약 큐레이션)', 'info');
   }
 
-  // 모드 변경에 따라 현재 화면 리렌더링
   if (appState.currentPage === 'home' || appState.currentPage === 'market') {
     renderApp();
   }
 }
 
 // ==========================================
-// 카테고리 메뉴 및 글로벌 검색
+// 상단 과목 탭 선택 & 카테고리 필터링
 // ==========================================
-function toggleCategoryMenu() {
-  const menu = document.getElementById('categoryDropdown');
-  menu.classList.toggle('hidden');
+function selectSubjectTab(subject) {
+  appState.selectedSubjectTab = subject;
+  
+  // 탭 UI 하이라이트 변경
+  const subjects = ['영어', '국어', '수학', '과학', '사회'];
+  subjects.forEach(s => {
+    const tabBtn = document.getElementById(`tab_sub_${s}`);
+    if (tabBtn) {
+      if (s === subject) {
+        tabBtn.className = 'subject-tab-btn px-3 py-2 font-bold text-slate-900 border-b-2 border-slate-900 transition shrink-0';
+      } else {
+        tabBtn.className = 'subject-tab-btn px-3 py-2 font-medium text-slate-600 hover:text-slate-900 border-b-2 border-transparent transition shrink-0';
+      }
+    }
+  });
+
+  // 검색창 셀렉트 동기화
+  const searchSelect = document.getElementById('searchSubjectSelect');
+  if (searchSelect) searchSelect.value = subject;
+
+  // 마켓 필터에 적용
+  appState.filters.subjects = [subject];
+  appState.filters.search = '';
+  navigateTo('market');
+  showToast(`'${subject}' 과목 자료 목록입니다.`, 'info');
+}
+
+function applySubjectFilter(subject, grade) {
+  selectSubjectTab(subject);
+  if (grade) {
+    appState.filters.grades = [grade];
+  } else {
+    appState.filters.grades = [];
+  }
+  document.getElementById('categoryDropdown')?.classList.add('hidden');
+  navigateTo('market');
 }
 
 function applyCategoryFilter(grade, subject) {
-  appState.filters.grades = [grade];
-  appState.filters.search = '';
-  navigateTo('market');
+  applySubjectFilter(subject, grade);
+}
+
+function onSearchSubjectChange(subj) {
+  if (subj) {
+    selectSubjectTab(subj);
+  } else {
+    appState.filters.subjects = [];
+    navigateTo('market');
+  }
+}
+
+function toggleCategoryMenu() {
+  const menu = document.getElementById('categoryDropdown');
+  if (menu) menu.classList.toggle('hidden');
 }
 
 function handleGlobalSearch(e) {
@@ -157,10 +205,12 @@ function handleGlobalSearch(e) {
 
 function focusMobileSearch() {
   const bar = document.getElementById('mobileSearchBar');
-  bar.classList.toggle('hidden');
-  const input = document.getElementById('mobileSearchInput');
-  if (!bar.classList.contains('hidden')) {
-    input.focus();
+  if (bar) {
+    bar.classList.toggle('hidden');
+    const input = document.getElementById('mobileSearchInput');
+    if (!bar.classList.contains('hidden') && input) {
+      input.focus();
+    }
   }
 }
 
@@ -176,95 +226,154 @@ function renderHomePage() {
     .slice(0, 5);
 
   return `
-    <!-- MAIN BANNER CAROUSEL -->
-    <section class="relative bg-gradient-to-r from-[#1A365D] via-[#1E293B] to-[#0F172A] text-white overflow-hidden py-12 md:py-16">
-      <!-- Background pattern -->
-      <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:16px_16px]"></div>
-      
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+    <!-- HERO PROMO BANNER SECTION (Matching Reference Screenshot) -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-4">
+      <div class="bg-gradient-to-r from-[#F1F5F9] via-[#F8FAFC] to-[#FDE8E1] rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
+        <div class="grid grid-cols-1 lg:grid-cols-12 min-h-[320px]">
           
-          <!-- Banner Left: Copy & CTA -->
-          <div class="lg:col-span-7 space-y-6">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/20 border border-teal-400/30 text-teal-300 text-xs font-semibold">
-              <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
-              ${isTeacher ? '출판사 정식 제휴 라이선싱 교육자료' : '전국 1등급 선배들이 검증한 시크릿 족보'}
-            </div>
-            
-            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight tracking-tight">
-              ${isTeacher 
-                ? '내신 시험 출제와 수업 준비를<br><span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-sky-400">10분 만에 완성</span>하는 마켓플레이스' 
-                : '중·고등 과학 내신 1등급 완성,<br><span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-sky-400">단원별 족보 & 개념노트</span> 다운로드'}
-            </h1>
-
-            <p class="text-slate-300 text-sm sm:text-base max-w-xl font-normal leading-relaxed">
-              ${isTeacher 
-                ? '비상교육, 천재, 미래엔 5종 교과서 수록 변형 문항 및 한글(HWP) 원본 파일 탑재! 클릭 한 번으로 다운로드하고 즉시 편집하세요.' 
-                : '대치동 1타 강사진과 현직 교사가 엄선한 킬러 문항과 직전 총정리! PDF로 태블릿과 스마트폰에서 바로 열람하세요.'}
-            </p>
-
-            <div class="flex flex-wrap items-center gap-3 pt-2">
-              <button onclick="navigateTo('market')" class="px-6 py-3.5 bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white font-bold rounded-xl shadow-lg shadow-teal-500/20 transition flex items-center gap-2 text-sm">
-                <i data-lucide="compass" class="w-4 h-4"></i> 자료 마켓 둘러보기
-              </button>
-              <button onclick="navigateTo('seller-dashboard')" class="px-5 py-3.5 bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold rounded-xl transition flex items-center gap-2 text-sm">
-                <i data-lucide="upload" class="w-4 h-4 text-teal-400"></i> 내 자료 등록하고 수익내기
-              </button>
-            </div>
-
-            <!-- Stats badges -->
-            <div class="grid grid-cols-3 gap-4 pt-4 border-t border-slate-800/80 max-w-lg">
-              <div>
-                <div class="text-xl sm:text-2xl font-black text-white">45,000+</div>
-                <div class="text-[11px] text-slate-400">등록된 검증 문항</div>
-              </div>
-              <div>
-                <div class="text-xl sm:text-2xl font-black text-teal-400">98.8%</div>
-                <div class="text-[11px] text-slate-400">선생님 만족도</div>
-              </div>
-              <div>
-                <div class="text-xl sm:text-2xl font-black text-sky-400">100%</div>
-                <div class="text-[11px] text-slate-400">합법 저작권 안심</div>
-              </div>
-            </div>
+          <!-- Banner Left: 5 Highlighted Tabs -->
+          <div class="lg:col-span-4 bg-slate-100/90 border-r border-slate-200/80 p-3 sm:p-4 flex flex-col justify-center space-y-1.5 text-xs font-semibold">
+            <button onclick="selectSubjectTab('영어')" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-white text-slate-900 shadow-xs border border-slate-200/60 text-left font-bold transition">
+              <span class="text-base">🍧</span>
+              <span>2학기 범위 내신기출 단원별 제공</span>
+            </button>
+            <button onclick="openChasaPassModal()" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-white/70 text-left transition">
+              <span class="text-base">❤️</span>
+              <span>전국 내신기출 10만 문항 무제한</span>
+            </button>
+            <button onclick="navigateTo('market')" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-white/70 text-left transition">
+              <span class="text-base">🍞</span>
+              <span>교과서 문제 전단원 20% 할인</span>
+            </button>
+            <button onclick="selectSubjectTab('영어')" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-white/70 text-left transition">
+              <span class="text-base">🍇</span>
+              <span>9모 파이널 자료 20% 할인</span>
+            </button>
+            <button onclick="navigateTo('seller-dashboard')" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-white/70 text-left transition">
+              <span class="text-base">💎</span>
+              <span>시험지 제출하면 포인트 증정</span>
+            </button>
           </div>
 
-          <!-- Banner Right: Interactive Carousel Card Frame -->
-          <div class="lg:col-span-5">
-            <div class="relative bg-slate-800/90 rounded-2xl p-5 border border-slate-700/80 shadow-2xl backdrop-blur-md">
-              <div class="flex items-center justify-between pb-3 border-b border-slate-700 text-xs">
-                <span class="flex items-center gap-1.5 text-teal-300 font-bold">
-                  <span class="w-2 h-2 rounded-full bg-teal-400 animate-ping"></span>
-                  실시간 화제의 추천 교재
-                </span>
-                <span class="text-slate-400 text-[11px]" id="carouselCounter">1 / 3</span>
+          <!-- Banner Center/Right: ChasaPass Card Promo -->
+          <div class="lg:col-span-8 p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden">
+            <div class="relative z-10 max-w-md space-y-3">
+              <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-orange-500 text-white text-[11px] font-black uppercase tracking-wide">
+                NEW 2학기 단원별 내신기출
               </div>
+              <h2 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-tight">
+                중·고등 내신자료 무제한<br>
+                <span class="text-orange-600">영어 찾사패스</span> 하나로 종결!
+              </h2>
+              <p class="text-xs sm:text-sm text-slate-600 font-medium">
+                비상·천재·YBM 교과서 본문 분석부터 9월 모평 변형 HWP까지 10만 문항 무제한 다운로드
+              </p>
+              <div class="pt-2 flex items-center gap-3">
+                <button onclick="openChasaPassModal()" class="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-md transition flex items-center gap-1.5">
+                  지금 바로 보러가기 <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                </button>
+                <button onclick="navigateTo('market')" class="px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl transition">
+                  전체 과목 보기
+                </button>
+              </div>
+            </div>
 
-              <!-- Carousel Slide Container -->
-              <div id="carouselSlideContent" class="py-4">
-                <!-- Slide rendered dynamically -->
+            <!-- Right Orange ChasaPass Graphics Card -->
+            <div class="absolute right-4 sm:right-10 top-1/2 -translate-y-1/2 hidden md:block">
+              <div class="w-56 h-36 bg-gradient-to-tr from-orange-600 via-orange-500 to-amber-500 rounded-2xl shadow-xl p-4 text-white flex flex-col justify-between rotate-6 hover:rotate-0 transition-transform duration-300 cursor-pointer relative" onclick="openChasaPassModal()">
+                <div class="flex justify-between items-start">
+                  <span class="text-[10px] bg-black/30 px-2 py-0.5 rounded font-bold">중고등 내신자료 무제한</span>
+                  <span class="text-xs bg-red-600 font-black px-2 py-0.5 rounded-full shadow">43% OFF</span>
+                </div>
+                <div>
+                  <div class="text-xl font-black tracking-tight leading-none mb-1">영어 찾사패스</div>
+                  <div class="text-[9px] text-orange-100 flex gap-1">
+                    <span>교과서</span> • <span>EBS</span> • <span>모의고사</span> • <span>참고서</span>
+                  </div>
+                </div>
               </div>
+            </div>
 
-              <!-- Carousel Controls -->
-              <div class="flex items-center justify-between pt-3 border-t border-slate-700">
-                <div class="flex gap-1.5" id="carouselDots">
-                  <span class="w-6 h-1.5 rounded-full bg-teal-500"></span>
-                  <span class="w-2 h-1.5 rounded-full bg-slate-600"></span>
-                  <span class="w-2 h-1.5 rounded-full bg-slate-600"></span>
-                </div>
-                <div class="flex gap-2">
-                  <button onclick="prevBannerSlide()" class="p-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200">
-                    <i data-lucide="chevron-left" class="w-4 h-4"></i>
-                  </button>
-                  <button onclick="nextBannerSlide()" class="p-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200">
-                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
-                  </button>
-                </div>
-              </div>
+            <!-- Carousel index badge -->
+            <div class="relative z-10 flex justify-end items-center pt-4">
+              <span class="text-[11px] bg-slate-900/60 text-white px-2 py-0.5 rounded-full font-mono font-bold flex items-center gap-1">
+                &lt; 1 / 5 &gt;
+              </span>
             </div>
           </div>
 
         </div>
+      </div>
+    </section>
+
+    <!-- QUICK MENU ICON GRID (Matching Reference Screenshot) -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div class="grid grid-cols-3 sm:grid-cols-6 gap-3 sm:gap-4 text-center">
+        <!-- 1. Brand Ranking -->
+        <button onclick="navigateTo('market')" class="bg-white p-3.5 rounded-2xl border border-slate-200 hover:border-teal-400 hover:shadow-sm transition flex flex-col items-center group">
+          <div class="relative mb-2">
+            <span class="absolute -top-1 -right-2 bg-red-500 text-white text-[9px] font-black px-1 rounded-full">HOT</span>
+            <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-2xl group-hover:scale-110 transition">
+              🏆
+            </div>
+          </div>
+          <span class="text-xs font-bold text-slate-800">브랜드 랭킹</span>
+          <span class="text-[10px] text-teal-600 font-semibold mt-0.5">이번 주 인기 순위</span>
+        </button>
+
+        <!-- 2. English ChasaPass -->
+        <button onclick="openChasaPassModal()" class="bg-white p-3.5 rounded-2xl border border-slate-200 hover:border-orange-400 hover:shadow-sm transition flex flex-col items-center group">
+          <div class="relative mb-2">
+            <span class="absolute -top-1 -right-2 bg-orange-600 text-white text-[9px] font-black px-1 rounded-full">2026</span>
+            <div class="w-12 h-12 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center text-2xl group-hover:scale-110 transition">
+              🎟️
+            </div>
+          </div>
+          <span class="text-xs font-bold text-slate-800">영어 찾사패스</span>
+          <span class="text-[10px] text-orange-600 font-semibold mt-0.5">전단원 무제한</span>
+        </button>
+
+        <!-- 3. Expert -->
+        <button onclick="openExpertModal()" class="bg-white p-3.5 rounded-2xl border border-slate-200 hover:border-indigo-400 hover:shadow-sm transition flex flex-col items-center group">
+          <div class="relative mb-2">
+            <span class="absolute -top-1 -right-2 bg-indigo-600 text-white text-[9px] font-black px-1 rounded-full">1개월 출시</span>
+            <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl group-hover:scale-110 transition">
+              💻
+            </div>
+          </div>
+          <span class="text-xs font-bold text-slate-800">영어 엑스퍼트</span>
+          <span class="text-[10px] text-indigo-600 font-semibold mt-0.5">1:1 킬러 자료실</span>
+        </button>
+
+        <!-- 4. Textbook / Workbook -->
+        <button onclick="selectSubjectTab('국어')" class="bg-white p-3.5 rounded-2xl border border-slate-200 hover:border-emerald-400 hover:shadow-sm transition flex flex-col items-center group">
+          <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl mb-2 group-hover:scale-110 transition">
+            📗
+          </div>
+          <span class="text-xs font-bold text-slate-800">교과서/참고서</span>
+          <span class="text-[10px] text-slate-400 mt-0.5">내신 출제 족보</span>
+        </button>
+
+        <!-- 5. Mock Exam -->
+        <button onclick="selectSubjectTab('영어')" class="bg-white p-3.5 rounded-2xl border border-slate-200 hover:border-blue-400 hover:shadow-sm transition flex flex-col items-center group">
+          <div class="relative mb-2">
+            <span class="absolute -top-1 -right-2 bg-blue-600 text-white text-[9px] font-black px-1 rounded-full">9월</span>
+            <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-2xl group-hover:scale-110 transition">
+              📁
+            </div>
+          </div>
+          <span class="text-xs font-bold text-slate-800">모의고사</span>
+          <span class="text-[10px] text-blue-600 font-semibold mt-0.5">변형자료 업데이트</span>
+        </button>
+
+        <!-- 6. Print / Binding -->
+        <button onclick="alert('찾사 제본 서비스: 한 권부터 전국 최저가로 스프링/무선제본 인쇄 배송됩니다.')" class="bg-white p-3.5 rounded-2xl border border-slate-200 hover:border-purple-400 hover:shadow-sm transition flex flex-col items-center group">
+          <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-2xl mb-2 group-hover:scale-110 transition">
+            📘
+          </div>
+          <span class="text-xs font-bold text-slate-800">찾사 제본</span>
+          <span class="text-[10px] text-purple-600 font-semibold mt-0.5">한권도 최저가</span>
+        </button>
       </div>
     </section>
 
@@ -600,6 +709,11 @@ function renderMarketPage() {
   // 필터링 적용 로직
   let filtered = [...MOCK_PRODUCTS];
 
+  // 0) 과목 필터
+  if (appState.filters.subjects && appState.filters.subjects.length > 0) {
+    filtered = filtered.filter(p => appState.filters.subjects.includes(p.subject));
+  }
+
   // 1) 학년 필터
   if (appState.filters.grades.length > 0) {
     filtered = filtered.filter(p => appState.filters.grades.includes(p.grade));
@@ -658,6 +772,12 @@ function renderMarketPage() {
 
           <!-- Active Filter tags -->
           <div class="flex items-center gap-2">
+            ${appState.filters.subjects.length > 0 ? `
+              <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-900 text-white text-xs font-semibold">
+                과목: ${appState.filters.subjects.join(', ')}
+                <button onclick="clearFilterCategory('subjects')"><i data-lucide="x" class="w-3 h-3"></i></button>
+              </span>
+            ` : ''}
             ${appState.filters.search ? `
               <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-teal-50 border border-teal-200 text-teal-700 text-xs font-semibold">
                 검색: "${appState.filters.search}"
@@ -676,7 +796,7 @@ function renderMarketPage() {
         
         <!-- LEFT: FILTER BAR -->
         <div class="lg:col-span-1">
-          <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm sticky top-24 space-y-6">
+          <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm sticky top-28 space-y-5">
             
             <div class="flex items-center justify-between pb-3 border-b border-slate-100">
               <span class="text-sm font-extrabold text-slate-900 flex items-center gap-1.5">
@@ -688,11 +808,30 @@ function renderMarketPage() {
               </button>
             </div>
 
-            <!-- 1. 학년별 필터 -->
+            <!-- 0. 과목 선택 필터 -->
             <div>
-              <label class="block text-xs font-bold text-slate-800 mb-2.5">학년별 과정</label>
+              <label class="block text-xs font-bold text-slate-800 mb-2">과목 선택</label>
+              <div class="grid grid-cols-2 gap-1.5 text-xs text-slate-700">
+                ${['영어', '국어', '수학', '과학', '사회'].map(s => `
+                  <label class="flex items-center gap-2 p-1.5 rounded-lg border cursor-pointer transition ${appState.filters.subjects.includes(s) ? 'bg-slate-900 text-white border-slate-900 font-bold' : 'border-slate-200 hover:bg-slate-50'}">
+                    <input 
+                      type="checkbox" 
+                      value="${s}" 
+                      ${appState.filters.subjects.includes(s) ? 'checked' : ''} 
+                      onchange="toggleFilter('subjects', '${s}')"
+                      class="hidden"
+                    >
+                    <span>${s}</span>
+                  </label>
+                `).join('')}
+              </div>
+            </div>
+
+            <!-- 1. 학년별 필터 -->
+            <div class="pt-3 border-t border-slate-100">
+              <label class="block text-xs font-bold text-slate-800 mb-2">과정/학년</label>
               <div class="space-y-1.5 text-xs text-slate-700">
-                ${['중1', '중2', '중3', '고1', '고등'].map(g => `
+                ${['중등', '중1', '중2', '중3', '고1', '고등', '수능'].map(g => `
                   <label class="flex items-center gap-2 cursor-pointer hover:text-teal-600">
                     <input 
                       type="checkbox" 
@@ -701,7 +840,7 @@ function renderMarketPage() {
                       onchange="toggleFilter('grades', '${g}')"
                       class="rounded text-teal-600 focus:ring-teal-500"
                     >
-                    <span>${g === '고등' ? '고등 수능형' : g + ' 과학'}</span>
+                    <span>${g === '고등' ? '고등 전학년' : g === '수능' ? '수능형 변형' : g}</span>
                   </label>
                 `).join('')}
               </div>
@@ -750,7 +889,7 @@ function renderMarketPage() {
               <div class="font-bold text-slate-700 mb-1 flex items-center gap-1">
                 <i data-lucide="info" class="w-3.5 h-3.5 text-teal-600"></i> 저작권 안심 보증
               </div>
-              쏠에듀의 모든 자료는 교과서 출판사 제휴 협약 및 원저작자의 정식 등록 승인을 거쳐 제공됩니다.
+              모든 과목을 찾는 사람들의 모든 자료는 교과서 출판사 제휴 협약 및 원저작자의 정식 등록 승인을 거쳐 제공됩니다.
             </div>
 
           </div>
@@ -971,7 +1110,7 @@ function renderProductDetailPage() {
                 <!-- Document Header -->
                 <div>
                   <div class="flex justify-between items-center border-b pb-2 mb-4 text-[11px] text-slate-400 font-mono">
-                    <span>SOLVEDU STUDY PAPER • [${prod.grade}] ${prod.subject}</span>
+                    <span>모든 과목을 찾는 사람들 STUDY PAPER • [${prod.grade}] ${prod.subject}</span>
                     <span>PAGE 0${samplePageData.page} / 0${prod.samplePreview.length} (샘플본)</span>
                   </div>
 
@@ -987,7 +1126,7 @@ function renderProductDetailPage() {
 
                 <!-- Document Footer in Preview -->
                 <div class="mt-8 pt-3 border-t border-slate-200 flex justify-between items-center text-[11px] text-slate-400">
-                  <span>저작권 등록: SolvEdu License Verified</span>
+                  <span>저작권 등록: 모든 과목을 찾는 사람들 License Verified</span>
                   <span class="text-red-500 font-semibold">※ 3페이지부터는 구매 후 전체 열람 및 다운로드가 가능합니다.</span>
                 </div>
 
@@ -1251,7 +1390,7 @@ function renderDetailTabContent(prod, reviews) {
             쏠북(Solvook) 모델 기반의 합법적 교육 저작권 이용 안내
           </h4>
           <p>
-            본 플랫폼 'SolvEdu'에 등록된 교육 콘텐츠는 교과서 출판사 및 원저작자와의 정식 디지털 라이선스 협약에 따라 판매됩니다.
+            본 플랫폼 '모든 과목을 찾는 사람들'에 등록된 교육 콘텐츠는 교과서 출판사 및 원저작자와의 정식 디지털 라이선스 협약에 따라 판매됩니다.
             구매자는 구매한 자료를 <strong>개인 학습용(학생)</strong> 또는 <strong>소속 학급/강좌의 수업 보충 지도용(교사/강사)</strong>으로 합법적으로 활용하실 수 있습니다.
           </p>
         </div>
@@ -1999,4 +2138,72 @@ function showToast(message, type = 'info') {
     toast.style.transition = 'opacity 0.3s ease';
     setTimeout(() => toast.remove(), 300);
   }, 3200);
+}
+
+// ==========================================
+// 찾사패스, 캐시, 엑스퍼트, 웰컴 팝업 핸들러
+// ==========================================
+function openChasaPassModal() {
+  const modal = document.getElementById('chasaPassModal');
+  if (modal) modal.classList.remove('hidden');
+}
+
+function closeChasaPassModal() {
+  const modal = document.getElementById('chasaPassModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function buyPass(passName) {
+  closeChasaPassModal();
+  showToast(`[${passName}] 이용권이 신청되었습니다! 10만 문항을 무제한 이용하세요.`, 'success');
+}
+
+function openCashModal() {
+  const modal = document.getElementById('cashModal');
+  if (modal) modal.classList.remove('hidden');
+}
+
+function closeCashModal() {
+  const modal = document.getElementById('cashModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function chargeCash(amount, bonus) {
+  closeCashModal();
+  showToast(`${amount.toLocaleString()}원 충전 완료! (+${bonus.toLocaleString()} 보너스 캐시 지급)`, 'success');
+}
+
+function openExpertModal() {
+  const modal = document.getElementById('expertModal');
+  if (modal) modal.classList.remove('hidden');
+}
+
+function closeExpertModal() {
+  const modal = document.getElementById('expertModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function closeBenefitModal(dontShowToday) {
+  const modal = document.getElementById('welcomeBenefitModal');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.style.display = 'none';
+  }
+  if (dontShowToday) {
+    const expireTime = new Date().getTime() + (24 * 60 * 60 * 1000);
+    localStorage.setItem('hide_benefit_popup', expireTime.toString());
+  }
+}
+
+function claimWelcomeBenefit() {
+  closeBenefitModal(false);
+  toggleAuthModal(true);
+  showToast('신규 가입 6종 쿠폰팩이 발급 대기 중입니다! 회원가입을 완료해 주세요.', 'info');
+}
+
+function clearFilterCategory(key) {
+  if (appState.filters[key]) {
+    appState.filters[key] = [];
+    renderApp();
+  }
 }

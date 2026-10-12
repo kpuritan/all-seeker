@@ -28,7 +28,7 @@ body {
 }
 
 .sample-watermark::after {
-  content: "SOLVEDU SAMPLE PREVIEW • 무단 복제 및 전재 금지";
+  content: "모든 과목을 찾는 사람들 SAMPLE PREVIEW • 무단 복제 및 전재 금지";
   position: absolute;
   top: 50%;
   left: 50%;

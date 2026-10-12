@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SolvEdu (쏠에듀) - 선생님과 학생을 위한 교육 자료 오픈마켓</title>
+  <title>모든 과목을 찾는 사람들 - 선생님과 학생을 위한 교육 자료 오픈마켓</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -41,202 +41,244 @@
   <!-- ========================================================
        TOP UTILITY BAR (Mode Toggle & Quick Links)
        ======================================================== -->
-  <header class="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm transition-all">
-    <div class="bg-slate-900 text-slate-300 text-xs px-4 py-1.5 border-b border-slate-800">
-      <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
-        <!-- Teacher / Student Mode Switch -->
-        <div class="flex items-center gap-2">
-          <span class="text-slate-400 font-medium">서비스 모드:</span>
-          <div class="inline-flex p-0.5 bg-slate-800 rounded-full border border-slate-700" id="modeSwitchContainer">
-            <button id="btnTeacherMode" onclick="switchUserMode('teacher')" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-brand-teal text-white shadow transition-all flex items-center gap-1">
-              <i data-lucide="graduation-cap" class="w-3.5 h-3.5"></i>
-              선생님 모드
-            </button>
-            <button id="btnStudentMode" onclick="switchUserMode('student')" class="px-2.5 py-0.5 rounded-full text-xs font-medium text-slate-400 hover:text-white transition-all flex items-center gap-1">
-              <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
-              학생 모드
-            </button>
-          </div>
-          <span id="modeDescriptionBadge" class="hidden sm:inline-block ml-2 text-teal-400 bg-teal-950/60 border border-teal-800/80 px-2 py-0.5 rounded text-[11px]">
-            수업용 HWP 한글파일 및 내신 변형 킬러문항 우선 노출 중
-          </span>
-        </div>
-
-        <!-- Utility Right -->
-        <div class="flex items-center gap-4 text-[11px] text-slate-400">
-          <button onclick="navigateTo('seller-dashboard')" class="hover:text-teal-400 transition flex items-center gap-1 font-medium text-slate-200">
-            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-teal-400"></i>
-            창작자(저자) 센터
-          </button>
-          <span class="text-slate-700">|</span>
-          <a href="#footer-section" class="hover:text-white transition">고객센터</a>
-          <span class="text-slate-700">|</span>
-          <button onclick="toggleAuthModal(true)" class="hover:text-white transition font-medium" id="authBtnTop">로그인 / 회원가입</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ========================================================
-         MAIN GNB NAVIGATION BAR
-         ======================================================== -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-4">
+  <!-- ========================================================
+       TOP MAIN HEADER (Brand, Teacher/Student Mode, Search, Auth)
+       ======================================================== -->
+  <header class="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-xs transition-all">
+    <!-- ROW 1: Logo, Mode Toggle, Promo Banner, Search Bar, Auth Buttons -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between gap-3 sm:gap-6">
       
-      <!-- Left: Logo & Category Dropdown -->
-      <div class="flex items-center gap-5">
-        <!-- Brand Logo -->
+      <!-- Left: Brand Logo & Teacher/Student Switch & Cash Promo -->
+      <div class="flex items-center gap-3 sm:gap-4 shrink-0">
+        <!-- Logo -->
         <a href="javascript:void(0)" onclick="navigateTo('home')" class="flex items-center gap-2 group">
-          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#1A365D] to-[#0D9488] flex items-center justify-center text-white shadow-md shadow-teal-900/10 group-hover:scale-105 transition">
-            <i data-lucide="layers" class="w-5 h-5 text-teal-200"></i>
+          <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-[#1A365D] to-[#0D9488] flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition">
+            <i data-lucide="layers" class="w-4 h-4 sm:w-5 sm:h-5 text-teal-200"></i>
           </div>
           <div class="flex flex-col">
-            <span class="text-xl font-black tracking-tight text-[#1A365D] flex items-center">
-              Solv<span class="text-teal-600">Edu</span>
-              <span class="ml-1 text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">Market</span>
+            <span class="text-base sm:text-lg font-black tracking-tight text-[#1A365D] flex items-center">
+              모든 과목을 찾는 사람들
+              <span class="ml-1 text-[9px] font-bold uppercase tracking-wider bg-slate-100 text-slate-600 px-1 py-0.5 rounded">Market</span>
             </span>
-            <span class="text-[10px] text-slate-400 -mt-1 font-medium">검증된 교육자료 오픈마켓</span>
           </div>
         </a>
 
-        <!-- Category Dropdown Button -->
-        <div class="relative" id="categoryMenuWrapper">
-          <button id="categoryToggleBtn" onclick="toggleCategoryMenu()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-slate-100 hover:bg-slate-200/80 text-slate-800 text-sm font-semibold transition border border-slate-200">
-            <i data-lucide="menu" class="w-4 h-4 text-[#1A365D]"></i>
-            카테고리
-            <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-500"></i>
+        <!-- Teacher / Student Mode Segment Toggle -->
+        <div class="inline-flex p-0.5 bg-slate-100 rounded-full border border-slate-200 text-xs shadow-inner" id="modeSwitchContainer">
+          <button id="btnTeacherMode" onclick="switchUserMode('teacher')" class="px-3 py-1 rounded-full text-xs font-bold bg-white text-slate-900 shadow-xs transition-all">
+            선생님
           </button>
+          <button id="btnStudentMode" onclick="switchUserMode('student')" class="px-3 py-1 rounded-full text-xs font-medium text-slate-500 hover:text-slate-900 transition-all">
+            학생
+          </button>
+        </div>
 
-          <!-- Dropdown Mega Menu -->
-          <div id="categoryDropdown" class="hidden absolute left-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-slate-100 z-50 p-3 fade-in">
-            <div class="text-[11px] font-bold text-slate-400 px-3 py-1.5 uppercase tracking-wider">과정별 바로가기</div>
-            
-            <!-- Middle School -->
-            <div class="mb-3">
-              <div class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-[#1A365D] bg-slate-50 rounded-lg">
-                <i data-lucide="book-marked" class="w-3.5 h-3.5 text-teal-600"></i>
-                중등 과정
-              </div>
-              <ul class="mt-1 space-y-0.5">
-                <li>
-                  <a href="javascript:void(0)" onclick="applyCategoryFilter('중1', '과학')" class="flex items-center justify-between px-3 py-1.5 text-xs text-slate-600 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition">
-                    <span>중1 과학 (내신/수행평가)</span>
-                    <span class="text-[10px] text-slate-400">지권/생물</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="javascript:void(0)" onclick="applyCategoryFilter('중2', '과학')" class="flex items-center justify-between px-3 py-1.5 text-xs text-slate-600 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition">
-                    <span>중2 과학 (내신/수행평가)</span>
-                    <span class="text-[10px] text-slate-400">물질/소화</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="javascript:void(0)" onclick="applyCategoryFilter('중3', '과학')" class="flex items-center justify-between px-3 py-1.5 text-xs text-slate-600 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition">
-                    <span>중3 과학 (내신/수행평가)</span>
-                    <span class="text-[10px] text-slate-400">운동/유전</span>
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <!-- High School -->
-            <div>
-              <div class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-[#1A365D] bg-slate-50 rounded-lg">
-                <i data-lucide="graduation-cap" class="w-3.5 h-3.5 text-blue-600"></i>
-                고등 과정
-              </div>
-              <ul class="mt-1 space-y-0.5">
-                <li>
-                  <a href="javascript:void(0)" onclick="applyCategoryFilter('고1', '통합과학')" class="flex items-center justify-between px-3 py-1.5 text-xs text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition">
-                    <span>고1 통합과학 (개념완성)</span>
-                    <span class="text-[10px] bg-red-50 text-red-600 px-1 rounded font-bold">인기</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="javascript:void(0)" onclick="applyCategoryFilter('고등', '수능과학')" class="flex items-center justify-between px-3 py-1.5 text-xs text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition">
-                    <span>수능형 융합/변형 문제 (고난도/PDF)</span>
-                    <span class="text-[10px] bg-teal-50 text-teal-700 px-1 rounded font-bold">HWP포함</span>
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div class="mt-3 pt-2 border-t border-slate-100 flex justify-between items-center px-2">
-              <button onclick="navigateTo('market')" class="text-xs font-semibold text-teal-600 hover:text-teal-700 flex items-center gap-1">
-                전체 자료 마켓 둘러보기 <i data-lucide="arrow-right" class="w-3 h-3"></i>
-              </button>
-            </div>
-          </div>
+        <!-- Cash Promo Badge -->
+        <div class="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-xs font-medium cursor-pointer hover:bg-amber-100/80 transition" onclick="openCashModal()">
+          <span class="text-sm">🪙</span>
+          <span><strong class="text-amber-800 font-bold">찾사 캐시</strong> 이용하면 모든 자료 20% 할인</span>
         </div>
       </div>
 
-      <!-- Center: Integrated Search Bar -->
-      <div class="flex-1 max-w-xl mx-2 hidden md:block">
-        <form onsubmit="handleGlobalSearch(event)" class="relative">
-          <div class="relative flex items-center">
+      <!-- Right: Search Bar & Auth / Quick Actions -->
+      <div class="flex items-center gap-2 sm:gap-4">
+        <!-- Integrated Search Bar -->
+        <form onsubmit="handleGlobalSearch(event)" class="relative hidden md:flex items-center">
+          <div class="flex items-center bg-slate-100/80 hover:bg-slate-100 border border-slate-300 rounded-full overflow-hidden transition focus-within:ring-2 focus-within:ring-slate-800 focus-within:border-slate-800 focus-within:bg-white shadow-inner">
+            <!-- Subject Select -->
+            <select id="searchSubjectSelect" onchange="onSearchSubjectChange(this.value)" class="bg-transparent pl-3 pr-1 py-1.5 text-xs font-bold text-slate-700 outline-none border-r border-slate-200 cursor-pointer">
+              <option value="">전체 과목</option>
+              <option value="영어">영어</option>
+              <option value="국어">국어</option>
+              <option value="수학">수학</option>
+              <option value="과학">과학</option>
+              <option value="사회">사회</option>
+            </select>
+            <!-- Search Text Input -->
             <input 
               type="text" 
               id="globalSearchInput" 
-              placeholder="단원명, 학교명, 출판사(비상/미래엔), 과목명으로 검색..."
-              class="w-full pl-11 pr-24 py-2.5 bg-slate-50 border border-slate-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:bg-white transition shadow-inner"
+              placeholder="'9월 모의고사'를 검색해 보세요" 
+              class="w-44 sm:w-56 lg:w-64 px-3 py-1.5 bg-transparent text-xs text-slate-800 placeholder-slate-400 outline-none"
             >
-            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-4 pointer-events-none"></i>
-            <button 
-              type="submit" 
-              class="absolute right-1.5 px-4 py-1.5 bg-[#1A365D] hover:bg-slate-800 text-white text-xs font-semibold rounded-full transition shadow-sm"
-            >
-              검색
+            <!-- Search Button -->
+            <button type="submit" class="pr-3 pl-1 text-slate-500 hover:text-slate-900 transition">
+              <i data-lucide="search" class="w-4 h-4"></i>
             </button>
           </div>
         </form>
-      </div>
 
-      <!-- Right: Library, Cart, My Page -->
-      <div class="flex items-center gap-2 sm:gap-3">
-        <!-- Search icon for mobile -->
+        <!-- Mobile search toggle button -->
         <button onclick="focusMobileSearch()" class="p-2 text-slate-600 hover:text-slate-900 md:hidden">
           <i data-lucide="search" class="w-5 h-5"></i>
         </button>
 
-        <!-- Library (자료 보관함) -->
-        <button onclick="navigateTo('library')" title="구매한 자료 보관함" class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-100 text-xs font-medium transition">
-          <i data-lucide="folder-down" class="w-4 h-4 text-[#1A365D]"></i>
-          <span class="hidden sm:inline">자료 보관함</span>
-        </button>
-
-        <!-- Cart (장바구니) -->
-        <button onclick="toggleCartDrawer(true)" class="relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-100 text-xs font-medium transition" title="장바구니">
-          <i data-lucide="shopping-cart" class="w-4 h-4 text-[#1A365D]"></i>
-          <span class="hidden sm:inline">장바구니</span>
-          <span id="cartCountBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow">
+        <!-- Cart Icon -->
+        <button onclick="toggleCartDrawer(true)" class="relative p-2 text-slate-600 hover:text-slate-900 transition rounded-lg hover:bg-slate-100" title="장바구니">
+          <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+          <span id="cartCountBadge" class="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow">
             0
           </span>
         </button>
 
-        <!-- Seller Dashboard Shortcut -->
-        <button onclick="navigateTo('seller-dashboard')" class="hidden lg:flex items-center gap-1 px-3 py-2 rounded-lg bg-teal-50 text-teal-700 border border-teal-200 hover:bg-teal-100 text-xs font-semibold transition">
-          <i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i>
-          판매자 대시보드
-        </button>
-
-        <!-- Login / User Profile -->
-        <button onclick="toggleAuthModal(true)" class="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#1A365D] hover:bg-[#152c4d] text-white text-xs font-semibold transition shadow-sm">
-          <i data-lucide="user" class="w-3.5 h-3.5"></i>
-          <span id="userLoginText">로그인</span>
-        </button>
+        <!-- Auth Buttons -->
+        <div class="flex items-center gap-1.5">
+          <button onclick="toggleAuthModal(true, 'login')" class="px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-semibold transition" id="authBtnTop">
+            로그인
+          </button>
+          <button onclick="toggleAuthModal(true, 'register')" class="px-3.5 py-1.5 rounded-lg bg-[#5B50E5] hover:bg-[#4E44CE] text-white text-xs font-bold transition shadow-xs">
+            회원가입
+          </button>
+        </div>
       </div>
 
     </div>
 
-    <!-- Mobile Search input bar (foldable) -->
-    <div id="mobileSearchBar" class="hidden px-4 pb-3 md:hidden">
-      <form onsubmit="handleGlobalSearch(event)" class="relative">
+    <!-- ROW 2: Horizontal Category Bar (Category, Subjects, ChasaPass, Expert, Pass Purchase, Cash) -->
+    <div class="border-t border-slate-200 bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between text-xs sm:text-sm">
+        
+        <!-- Left: Category Button & Listed Subjects & Submenus -->
+        <div class="flex items-center gap-1 sm:gap-2 overflow-x-auto no-scrollbar py-1">
+          
+          <!-- Category Mega Dropdown Button -->
+          <div class="relative" id="categoryMenuWrapper">
+            <button id="categoryToggleBtn" onclick="toggleCategoryMenu()" class="flex items-center gap-1.5 px-3 py-2 text-slate-900 font-bold hover:bg-slate-100 rounded-lg transition shrink-0">
+              <i data-lucide="layout-grid" class="w-4 h-4 text-slate-800"></i>
+              <span>카테고리</span>
+            </button>
+
+            <!-- Mega Dropdown Panel -->
+            <div id="categoryDropdown" class="hidden absolute left-0 mt-1 w-96 bg-white rounded-xl shadow-2xl border border-slate-200 z-50 p-4 fade-in">
+              <div class="text-[11px] font-bold text-slate-400 pb-2 border-b border-slate-100 uppercase tracking-wider">
+                전과목 상세 카테고리
+              </div>
+              <div class="grid grid-cols-2 gap-3 mt-3">
+                <!-- English -->
+                <div class="space-y-1">
+                  <div class="font-bold text-slate-900 flex items-center gap-1 text-xs text-blue-900">
+                    <span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span> 영어
+                  </div>
+                  <ul class="text-[11px] space-y-1 pl-2.5 text-slate-600">
+                    <li><a href="javascript:void(0)" onclick="applySubjectFilter('영어', '고1')" class="hover:text-blue-600">고1 9월 모의고사 변형</a></li>
+                    <li><a href="javascript:void(0)" onclick="applySubjectFilter('영어', '중등')" class="hover:text-blue-600">중등 교과서별 본문/문법</a></li>
+                    <li><a href="javascript:void(0)" onclick="applySubjectFilter('영어', '수능')" class="hover:text-blue-600">수능 EBS 연계 구문독해</a></li>
+                  </ul>
+                </div>
+                <!-- Korean -->
+                <div class="space-y-1">
+                  <div class="font-bold text-slate-900 flex items-center gap-1 text-xs text-emerald-900">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span> 국어
+                  </div>
+                  <ul class="text-[11px] space-y-1 pl-2.5 text-slate-600">
+                    <li><a href="javascript:void(0)" onclick="applySubjectFilter('국어', '고등')" class="hover:text-emerald-600">수능/모평 문학 도식화</a></li>
+                    <li><a href="javascript:void(0)" onclick="applySubjectFilter('국어', '중등')" class="hover:text-emerald-600">중등 국어 문법/음운변동</a></li>
+                  </ul>
+                </div>
+                <!-- Math -->
+                <div class="space-y-1">
+                  <div class="font-bold text-slate-900 flex items-center gap-1 text-xs text-indigo-900">
+                    <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span> 수학
+                  </div>
+                  <ul class="text-[11px] space-y-1 pl-2.5 text-slate-600">
+                    <li><a href="javascript:void(0)" onclick="applySubjectFilter('수학', '고1')" class="hover:text-indigo-600">고1 도형의 방정식 킬러</a></li>
+                    <li><a href="javascript:void(0)" onclick="applySubjectFilter('수학', '중등')" class="hover:text-indigo-600">중등 일차함수 서술형</a></li>
+                  </ul>
+                </div>
+                <!-- Science -->
+                <div class="space-y-1">
+                  <div class="font-bold text-slate-900 flex items-center gap-1 text-xs text-teal-900">
+                    <span class="w-1.5 h-1.5 rounded-full bg-teal-600"></span> 과학
+                  </div>
+                  <ul class="text-[11px] space-y-1 pl-2.5 text-slate-600">
+                    <li><a href="javascript:void(0)" onclick="applySubjectFilter('과학', '고1')" class="hover:text-teal-600">고1 통합과학 킬러특강</a></li>
+                    <li><a href="javascript:void(0)" onclick="applySubjectFilter('과학', '중등')" class="hover:text-teal-600">중1~3 지권/생물/운동</a></li>
+                  </ul>
+                </div>
+                <!-- Social -->
+                <div class="space-y-1">
+                  <div class="font-bold text-slate-900 flex items-center gap-1 text-xs text-amber-900">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-600"></span> 사회
+                  </div>
+                  <ul class="text-[11px] space-y-1 pl-2.5 text-slate-600">
+                    <li><a href="javascript:void(0)" onclick="applySubjectFilter('사회', '고1')" class="hover:text-amber-600">고1 통합사회 단권화 노트</a></li>
+                    <li><a href="javascript:void(0)" onclick="applySubjectFilter('사회', '중등')" class="hover:text-amber-600">중등 역사/사회 수행평가</a></li>
+                  </ul>
+                </div>
+              </div>
+              <div class="mt-4 pt-2 border-t border-slate-100 flex justify-between items-center text-xs">
+                <button onclick="navigateTo('market')" class="text-teal-700 font-bold hover:underline">
+                  전체 자료 둘러보기 &rarr;
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Subject Tabs (Horizontal Array exactly as image: 영어, 국어, 수학, 과학, 사회) -->
+          <button onclick="selectSubjectTab('영어')" id="tab_sub_영어" class="subject-tab-btn px-3 py-2 font-bold text-slate-900 border-b-2 border-slate-900 transition shrink-0">
+            영어
+          </button>
+          <button onclick="selectSubjectTab('국어')" id="tab_sub_국어" class="subject-tab-btn px-3 py-2 font-medium text-slate-600 hover:text-slate-900 border-b-2 border-transparent transition shrink-0">
+            국어
+          </button>
+          <button onclick="selectSubjectTab('수학')" id="tab_sub_수학" class="subject-tab-btn px-3 py-2 font-medium text-slate-600 hover:text-slate-900 border-b-2 border-transparent transition shrink-0">
+            수학
+          </button>
+          <button onclick="selectSubjectTab('과학')" id="tab_sub_과학" class="subject-tab-btn px-3 py-2 font-medium text-slate-600 hover:text-slate-900 border-b-2 border-transparent transition shrink-0">
+            과학
+          </button>
+          <button onclick="selectSubjectTab('사회')" id="tab_sub_사회" class="subject-tab-btn px-3 py-2 font-medium text-slate-600 hover:text-slate-900 border-b-2 border-transparent transition shrink-0">
+            사회
+          </button>
+
+          <!-- Divider -->
+          <span class="text-slate-300 mx-1 shrink-0">|</span>
+
+          <!-- ChasaPass dropdown / modal button -->
+          <button onclick="openChasaPassModal()" class="flex items-center gap-1 px-2.5 py-2 text-slate-800 hover:text-orange-600 font-bold transition shrink-0">
+            <span class="text-orange-600">찾사패스</span>
+            <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400"></i>
+          </button>
+
+          <!-- Expert dropdown / modal button -->
+          <button onclick="openExpertModal()" class="flex items-center gap-1 px-2.5 py-2 text-slate-700 hover:text-slate-900 font-medium transition shrink-0">
+            <span>엑스퍼트</span>
+            <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400"></i>
+          </button>
+
+        </div>
+
+        <!-- Right: Pass Purchase | Cash Recharge -->
+        <div class="hidden sm:flex items-center gap-3 text-xs text-slate-600 font-medium shrink-0">
+          <button onclick="openChasaPassModal()" class="flex items-center gap-1 hover:text-blue-700 transition font-semibold">
+            <i data-lucide="ticket" class="w-3.5 h-3.5 text-blue-600"></i>
+            <span>이용권 구매</span>
+          </button>
+          <span class="text-slate-300">|</span>
+          <button onclick="openCashModal()" class="flex items-center gap-1 hover:text-amber-700 transition font-semibold">
+            <i data-lucide="coins" class="w-3.5 h-3.5 text-amber-500"></i>
+            <span>캐시 충전</span>
+          </button>
+          <span class="text-slate-300">|</span>
+          <button onclick="navigateTo('seller-dashboard')" class="hover:text-teal-700 transition flex items-center gap-1">
+            <i data-lucide="sparkles" class="w-3 h-3 text-teal-600"></i>
+            <span>창작자 센터</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Mobile Search Bar (Foldable) -->
+    <div id="mobileSearchBar" class="hidden px-4 py-2 bg-slate-50 border-t border-slate-200 md:hidden">
+      <form onsubmit="handleGlobalSearch(event)" class="flex items-center gap-2">
         <input 
           type="text" 
           id="mobileSearchInput" 
-          placeholder="단원명, 학교명, 출판사명 검색..."
-          class="w-full pl-9 pr-16 py-2 bg-slate-100 border border-slate-300 rounded-lg text-xs"
+          placeholder="과목, 단원명, 출판사명 검색..." 
+          class="flex-1 px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs outline-none"
         >
-        <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
-        <button type="submit" class="absolute right-1 top-1 px-3 py-1 bg-[#1A365D] text-white text-xs rounded-md">검색</button>
+        <button type="submit" class="px-3 py-1.5 bg-slate-900 text-white rounded-lg text-xs font-bold">검색</button>
       </form>
     </div>
   </header>
@@ -262,8 +304,8 @@
       <!-- Top Links -->
       <div class="flex flex-wrap items-center justify-between gap-4 pb-8 border-b border-slate-800">
         <div class="flex flex-wrap items-center gap-6 text-xs font-semibold text-slate-300">
-          <a href="javascript:void(0)" onclick="alert('쏠에듀는 합법적인 교육 콘텐츠 저작권 라이선싱 마켓입니다.')" class="hover:text-teal-400 transition">회사소개</a>
-          <a href="javascript:void(0)" onclick="alert('쏠에듀는 초·중·고 교사와 강사, 학생을 연결하는 오픈 플랫폼입니다.')" class="hover:text-teal-400 transition">서비스소개</a>
+          <a href="javascript:void(0)" onclick="alert('모든 과목을 찾는 사람들은 합법적인 교육 콘텐츠 저작권 라이선싱 마켓입니다.')" class="hover:text-teal-400 transition">회사소개</a>
+          <a href="javascript:void(0)" onclick="alert('모든 과목을 찾는 사람들은 초·중·고 교사와 강사, 학생을 연결하는 오픈 플랫폼입니다.')" class="hover:text-teal-400 transition">서비스소개</a>
           <a href="javascript:void(0)" onclick="alert('이용약관 안내 페이지입니다.')" class="hover:text-teal-400 transition">이용약관</a>
           <a href="javascript:void(0)" onclick="alert('개인정보처리방침 안내 페이지입니다.')" class="hover:text-teal-400 text-white underline underline-offset-4 transition">개인정보처리방침</a>
           <a href="javascript:void(0)" onclick="alert('디지털 콘텐츠는 다운로드 이후 환불이 제한될 수 있습니다.')" class="hover:text-teal-400 transition">취소/환불정책</a>
@@ -280,23 +322,23 @@
       <div class="pt-8 grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-slate-400">
         <div>
           <div class="flex items-center gap-2 mb-3">
-            <span class="text-base font-bold text-white tracking-tight">Solv<span class="text-teal-400">Edu</span></span>
+            <span class="text-base font-bold text-white tracking-tight">모든 과목을 찾는 사람들</span>
             <span class="text-[11px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded border border-slate-700">EdTech Copyright Platform</span>
           </div>
           <p class="leading-relaxed">
-            (주)쏠에듀에듀케이션 | 대표자: 성시원 | 개인정보보호책임자: 한동훈<br>
+            모든 과목을 찾는 사람들 | 대표자: 성시원 | 개인정보보호책임자: 한동훈<br>
             사업자등록번호: 214-88-99432 | 통신판매업신고: 제2025-서울강남-0419호<br>
-            주소: 서울특별시 강남구 테헤란로 427, 위워크타워 9층 (삼성동) | 이메일: support@solvedu.kr
+            주소: 서울특별시 강남구 테헤란로 427, 위워크타워 9층 (삼성동) | 이메일: support@allseeker.org
           </p>
         </div>
 
         <div class="md:text-right flex flex-col justify-between">
           <p class="text-[11px] text-slate-400 leading-relaxed">
-            SolvEdu 플랫폼 내 등록된 교재, 문제, 해설 등의 교육 저작권은 각 원저작자 및 출판사 제휴 협약에 따르며,<br>
+            모든 과목을 찾는 사람들 플랫폼 내 등록된 교재, 문제, 해설 등의 교육 저작권은 각 원저작자 및 출판사 제휴 협약에 따르며,<br>
             무단 전재, 복제, 무단 배포 시 저작권법 제136조에 따라 법적 처벌을 받을 수 있습니다.
           </p>
           <p class="text-slate-400 text-[11px] mt-4">
-            Copyright © 2025 SolvEdu Inc. All rights reserved. 쏠북(Solvook) 모델 벤치마킹 프로토타입.
+            Copyright © 2025 모든 과목을 찾는 사람들. All rights reserved. 쏠북(Solvook) 모델 벤치마킹 프로토타입.
           </p>
         </div>
       </div>
@@ -333,7 +375,7 @@
             <span id="cartSubtotal">0원</span>
           </div>
           <div class="flex justify-between text-sm text-teal-600 font-medium">
-            <span>쏠북 제휴 할인 혜택</span>
+            <span>찾사패스 제휴 할인 혜택</span>
             <span id="cartDiscount">-0원</span>
           </div>
           <div class="border-t border-slate-200 pt-3 flex justify-between text-base font-extrabold text-slate-900">
@@ -359,7 +401,7 @@
           <div class="w-7 h-7 rounded-lg bg-[#1A365D] text-white flex items-center justify-center">
             <i data-lucide="layers" class="w-4 h-4 text-teal-300"></i>
           </div>
-          <h3 class="font-bold text-slate-900">SolvEdu 간편 로그인</h3>
+          <h3 class="font-bold text-slate-900">모든 과목을 찾는 사람들 간편 로그인</h3>
         </div>
         <button onclick="toggleAuthModal(false)" class="text-slate-400 hover:text-slate-700">
           <i data-lucide="x" class="w-5 h-5"></i>
@@ -373,7 +415,7 @@
 
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">이메일 계정</label>
-          <input type="email" id="authEmailInput" value="teacher_kim@solvedu.kr" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+          <input type="email" id="authEmailInput" value="teacher_kim@allseeker.org" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
         </div>
 
         <div>
@@ -408,6 +450,199 @@
           </button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       NEW USER 6-BENEFIT POPUP MODAL (신규 회원 6종 혜택 팝업)
+       ======================================================== -->
+  <div id="welcomeBenefitModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 transition-all">
+    <!-- Clickable Backdrop Overlay -->
+    <div class="absolute inset-0" onclick="closeBenefitModal(false)"></div>
+    <div class="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl fade-in flex flex-col relative z-10">
+      <!-- Top Right Close X Button -->
+      <button onclick="closeBenefitModal(false)" class="absolute top-3 right-3 text-white/80 hover:text-white p-1 rounded-full z-20 transition" title="닫기">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <!-- Blue Header -->
+      <div class="bg-gradient-to-b from-[#2B66F6] to-[#1E4FE3] text-white p-5 pt-6 text-center space-y-1 relative">
+        <p class="text-xs font-semibold text-blue-100">지금이 가입할 타이밍!</p>
+        <h3 class="text-lg font-black tracking-tight text-white leading-snug">
+          신규 회원에게만 드리는
+        </h3>
+        <div class="inline-block bg-white text-[#1E4FE3] font-black text-base px-3 py-0.5 rounded-lg shadow-sm mt-1">
+          지금 가입 6종 혜택
+        </div>
+      </div>
+
+      <!-- 6 Benefit Coupons Grid -->
+      <div class="p-4 bg-slate-50 space-y-2">
+        <div class="grid grid-cols-3 gap-1.5 text-center text-[10px]">
+          <!-- Item 1 -->
+          <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-2xs flex flex-col justify-between">
+            <span class="font-bold text-slate-800 leading-tight">찾사패스 자료<br><strong class="text-blue-600">무료이용권</strong></span>
+            <span class="mt-1 text-[9px] text-blue-600 font-semibold flex items-center justify-center gap-0.5">
+              <i data-lucide="download" class="w-2.5 h-2.5"></i> 받기
+            </span>
+          </div>
+          <!-- Item 2 -->
+          <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-2xs flex flex-col justify-between">
+            <span class="font-bold text-slate-800 leading-tight">전과목 자료<br><strong class="text-red-500">30% 할인</strong></span>
+            <span class="mt-1 text-[9px] text-blue-600 font-semibold flex items-center justify-center gap-0.5">
+              <i data-lucide="download" class="w-2.5 h-2.5"></i> 받기
+            </span>
+          </div>
+          <!-- Item 3 -->
+          <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-2xs flex flex-col justify-between">
+            <span class="font-bold text-slate-800 leading-tight">엑스퍼트 기출<br><strong class="text-purple-600">무료이용권</strong></span>
+            <span class="mt-1 text-[9px] text-blue-600 font-semibold flex items-center justify-center gap-0.5">
+              <i data-lucide="download" class="w-2.5 h-2.5"></i> 받기
+            </span>
+          </div>
+          <!-- Item 4 -->
+          <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-2xs flex flex-col justify-between">
+            <span class="font-bold text-slate-800 leading-tight">찾사패스 첫구매<br><strong class="text-orange-500">60% 할인</strong></span>
+            <span class="mt-1 text-[9px] text-blue-600 font-semibold flex items-center justify-center gap-0.5">
+              <i data-lucide="download" class="w-2.5 h-2.5"></i> 받기
+            </span>
+          </div>
+          <!-- Item 5 -->
+          <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-2xs flex flex-col justify-between">
+            <span class="font-bold text-slate-800 leading-tight">캐시 첫구매<br><strong class="text-amber-500">20% 추가</strong></span>
+            <span class="mt-1 text-[9px] text-blue-600 font-semibold flex items-center justify-center gap-0.5">
+              <i data-lucide="download" class="w-2.5 h-2.5"></i> 받기
+            </span>
+          </div>
+          <!-- Item 6 -->
+          <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-2xs flex flex-col justify-between">
+            <span class="font-bold text-slate-800 leading-tight">첫 제작 자료<br><strong class="text-emerald-600">무료 검수</strong></span>
+            <span class="mt-1 text-[9px] text-blue-600 font-semibold flex items-center justify-center gap-0.5">
+              <i data-lucide="download" class="w-2.5 h-2.5"></i> 받기
+            </span>
+          </div>
+        </div>
+
+        <!-- CTA Button -->
+        <button onclick="claimWelcomeBenefit()" class="w-full mt-2 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-xs flex flex-col items-center justify-center shadow-lg transition">
+          <span class="text-[10px] bg-yellow-400 text-slate-900 font-black px-1.5 py-0.2 rounded mb-0.5">총 24만원 상당!</span>
+          <span class="flex items-center gap-1">지금 가입하고 혜택 모두 받기 &gt;</span>
+        </button>
+      </div>
+
+      <!-- Bottom Close Actions -->
+      <div class="bg-white px-4 py-2.5 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
+        <button onclick="closeBenefitModal(true)" class="hover:text-slate-800 transition">오늘 하루 보지 않기</button>
+        <button onclick="closeBenefitModal(false)" class="font-bold text-slate-800 hover:text-slate-900 transition">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       CHASAPASS MODAL (찾사패스 상세 안내 & 구매 모달)
+       ======================================================== -->
+  <div id="chasaPassModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 hidden">
+    <div class="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl fade-in space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div class="flex items-center gap-2">
+          <span class="p-2 rounded-xl bg-orange-100 text-orange-600 font-black text-sm">PASS</span>
+          <div>
+            <h3 class="font-bold text-slate-900 text-base">모든 과목을 찾는 사람들 '찾사패스'</h3>
+            <p class="text-xs text-slate-400">초·중·고 내신기출 10만 문항 및 HWP 무제한 다운로드</p>
+          </div>
+        </div>
+        <button onclick="closeChasaPassModal()" class="text-slate-400 hover:text-slate-700">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Plans -->
+      <div class="grid grid-cols-2 gap-3 text-left">
+        <!-- 30일 패스 -->
+        <div class="p-4 rounded-xl border-2 border-slate-200 hover:border-orange-500 cursor-pointer transition space-y-2 bg-slate-50">
+          <div class="text-xs font-bold text-slate-600">내신 단기 완성 (30일)</div>
+          <div class="text-lg font-black text-slate-900">29,000원</div>
+          <p class="text-[11px] text-slate-500 leading-tight">선택 1개 과목 전 단원 HWP/PDF 무제한 다운로드</p>
+          <button onclick="buyPass('30일 단기 패스')" class="w-full py-1.5 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-bold transition">신청하기</button>
+        </div>
+
+        <!-- 전과목 연간 패스 (추천) -->
+        <div class="p-4 rounded-xl border-2 border-orange-500 bg-orange-50/50 cursor-pointer transition space-y-2 relative">
+          <span class="absolute -top-2.5 right-3 bg-red-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full">43% OFF</span>
+          <div class="text-xs font-bold text-orange-700">전과목 프리미엄 패스 (1년)</div>
+          <div class="text-lg font-black text-orange-600">99,000원 <span class="text-xs text-slate-400 line-through font-normal">174,000원</span></div>
+          <p class="text-[11px] text-slate-600 leading-tight">국어, 영어, 수학, 과학, 사회 전과목 무제한 + 엑스퍼트 문항</p>
+          <button onclick="buyPass('전과목 프리미엄 1년 패스')" class="w-full py-1.5 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-xs font-bold shadow-sm transition">할인가 구매하기</button>
+        </div>
+      </div>
+
+      <div class="p-3 bg-slate-100 rounded-xl text-[11px] text-slate-600 space-y-1">
+        <div class="font-bold text-slate-800 flex items-center gap-1">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5 text-teal-600"></i> 저작권 100% 안심 보증
+        </div>
+        <p>구매하신 자료는 학교/학원 수업 교재 및 시험 출제에 합법적으로 즉시 편집 및 인쇄하여 사용 가능합니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       CASH CHARGE MODAL (찾사 캐시 충전 모달)
+       ======================================================== -->
+  <div id="cashModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 hidden">
+    <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl fade-in space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">🪙</span>
+          <h3 class="font-bold text-slate-900 text-base">찾사 캐시 즉시 충전</h3>
+        </div>
+        <button onclick="closeCashModal()" class="text-slate-400 hover:text-slate-700">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <p class="text-xs text-slate-500">캐시 충전 시 모든 교육 자료 20% 상시 추가 할인 혜택이 적용됩니다.</p>
+
+      <div class="space-y-2">
+        <button onclick="chargeCash(10000, 2000)" class="w-full p-3 rounded-xl border border-slate-200 hover:border-amber-500 flex items-center justify-between transition text-xs">
+          <span class="font-bold text-slate-800">10,000원 (+2,000 보너스)</span>
+          <span class="font-black text-amber-600">12,000 C</span>
+        </button>
+        <button onclick="chargeCash(30000, 7000)" class="w-full p-3 rounded-xl border border-slate-200 hover:border-amber-500 flex items-center justify-between transition text-xs">
+          <span class="font-bold text-slate-800">30,000원 (+7,000 보너스)</span>
+          <span class="font-black text-amber-600">37,000 C</span>
+        </button>
+        <button onclick="chargeCash(50000, 15000)" class="w-full p-3 rounded-xl border-2 border-amber-500 bg-amber-50/40 flex items-center justify-between transition text-xs">
+          <span class="font-bold text-amber-900">50,000원 (+15,000 보너스) <span class="text-[10px] bg-red-500 text-white px-1 rounded">인기</span></span>
+          <span class="font-black text-amber-700 text-sm">65,000 C</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       EXPERT MODAL (엑스퍼트 1:1 자료실 모달)
+       ======================================================== -->
+  <div id="expertModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 hidden">
+    <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl fade-in space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div class="flex items-center gap-2">
+          <span class="p-1.5 rounded-lg bg-indigo-100 text-indigo-700 font-black text-xs">EXPERT</span>
+          <h3 class="font-bold text-slate-900 text-base">엑스퍼트 1타 강사 자료실</h3>
+        </div>
+        <button onclick="closeExpertModal()" class="text-slate-400 hover:text-slate-700">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <p class="text-xs text-slate-600 leading-relaxed">
+        대치동·목동 1타 강사진이 직접 제작한 학교별 맞춤 변형 문항 및 비공개 킬러 족보를 1:1 요청하실 수 있습니다.
+      </p>
+      <div class="p-3 bg-slate-50 rounded-xl text-xs space-y-1.5 text-slate-700">
+        <div>• <strong>영어:</strong> 제니퍼 강T 9월 학평 3단 변형</div>
+        <div>• <strong>수학:</strong> 강민수T 원과 직선 킬러 60선</div>
+        <div>• <strong>국어:</strong> 문학의 정석 LAB 수능 연계 시가</div>
+      </div>
+      <button onclick="closeExpertModal(); navigateTo('market');" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition">
+        엑스퍼트 자료 둘러보기
+      </button>
     </div>
   </div>
 
